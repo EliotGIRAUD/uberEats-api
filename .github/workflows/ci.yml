@@ -88,7 +88,8 @@ jobs:
       - name: Build and push image (main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/ubereats-api"
+          OWNER_LC="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          IMAGE="ghcr.io/${OWNER_LC}/ubereats-api"
           SHA_TAG="${GITHUB_SHA}"
           docker build -t "${IMAGE}:latest" -t "${IMAGE}:${SHA_TAG}" .
           docker push "${IMAGE}:latest"
