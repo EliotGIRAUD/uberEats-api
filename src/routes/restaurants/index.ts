@@ -55,6 +55,8 @@ export async function restaurantsRoutes(fastify: FastifyInstance) {
     "/",
     {
       schema: {
+        tags: ["Restaurants"],
+        summary: "List restaurants with filters",
         querystring: restaurantListQuerySchema,
         response: {
           200: restaurantsPaginatedResponseSchema
@@ -78,6 +80,9 @@ export async function restaurantsRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.ADMIN, UserRole.RESTAURANT]),
       schema: {
+        tags: ["Restaurants"],
+        summary: "Create restaurant",
+        security: [{ bearerAuth: [] }],
         body: createRestaurantRequestBodySchema,
         response: {
           201: restaurantResponseSchema,
@@ -125,6 +130,9 @@ export async function restaurantsRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.RESTAURANT]),
       schema: {
+        tags: ["Restaurants"],
+        summary: "Get my restaurant",
+        security: [{ bearerAuth: [] }],
         response: {
           200: restaurantResponseSchema,
           401: problemDetailsSchema,
@@ -143,6 +151,9 @@ export async function restaurantsRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.RESTAURANT]),
       schema: {
+        tags: ["Restaurants"],
+        summary: "Update my restaurant",
+        security: [{ bearerAuth: [] }],
         body: updateRestaurantBodySchema,
         response: {
           200: restaurantResponseSchema,
@@ -165,6 +176,8 @@ export async function restaurantsRoutes(fastify: FastifyInstance) {
     "/:restaurantId",
     {
       schema: {
+        tags: ["Restaurants"],
+        summary: "Get restaurant by id",
         params: restaurantIdParamsSchema,
         response: {
           200: restaurantResponseSchema,
@@ -186,6 +199,9 @@ export async function restaurantsRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.ADMIN, UserRole.RESTAURANT]),
       schema: {
+        tags: ["Restaurants"],
+        summary: "Delete a restaurant",
+        security: [{ bearerAuth: [] }],
         params: restaurantIdParamsSchema,
         response: {
           204: { type: "null" },

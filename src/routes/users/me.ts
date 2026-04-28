@@ -24,6 +24,9 @@ export async function usersMeRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([...profileRoles]),
       schema: {
+        tags: ["Users"],
+        summary: "Get my profile",
+        security: [{ bearerAuth: [] }],
         response: {
           200: userProfileResponseSchema,
           401: problemDetailsSchema,
@@ -42,6 +45,9 @@ export async function usersMeRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([...profileRoles]),
       schema: {
+        tags: ["Users"],
+        summary: "Update my profile",
+        security: [{ bearerAuth: [] }],
         body: updateMeBodySchema,
         response: {
           200: userProfileResponseSchema,
@@ -62,6 +68,9 @@ export async function usersMeRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.USER]),
       schema: {
+        tags: ["Users"],
+        summary: "Delete my user account",
+        security: [{ bearerAuth: [] }],
         response: {
           200: deleteMeResponseSchema,
           401: problemDetailsSchema,

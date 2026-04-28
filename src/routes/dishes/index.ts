@@ -42,6 +42,9 @@ export async function restaurantDishesRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.RESTAURANT]),
       schema: {
+        tags: ["Dishes"],
+        summary: "Create dish for a restaurant",
+        security: [{ bearerAuth: [] }],
         params: dishParamsByRestaurantSchema,
         body: createDishBodySchema,
         response: {
@@ -67,6 +70,8 @@ export async function restaurantDishesRoutes(fastify: FastifyInstance) {
     "/",
     {
       schema: {
+        tags: ["Dishes"],
+        summary: "List dishes by restaurant",
         params: dishParamsByRestaurantSchema,
         querystring: dishesListQuerySchema,
         response: {
@@ -92,6 +97,8 @@ export async function dishesRoutes(fastify: FastifyInstance) {
     "/:dishId",
     {
       schema: {
+        tags: ["Dishes"],
+        summary: "Get dish by id",
         params: dishIdParamsSchema,
         response: {
           200: dishResponseSchema,
@@ -109,6 +116,9 @@ export async function dishesRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.RESTAURANT]),
       schema: {
+        tags: ["Dishes"],
+        summary: "Update dish",
+        security: [{ bearerAuth: [] }],
         params: dishIdParamsSchema,
         body: updateDishBodySchema,
         response: {
@@ -130,6 +140,9 @@ export async function dishesRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.RESTAURANT]),
       schema: {
+        tags: ["Dishes"],
+        summary: "Delete dish",
+        security: [{ bearerAuth: [] }],
         params: dishIdParamsSchema,
         response: {
           204: { type: "null" },

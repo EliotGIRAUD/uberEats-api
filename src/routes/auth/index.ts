@@ -29,7 +29,15 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post<{ Body: AuthBody }>(
     "/register",
     {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: "1 minute"
+        }
+      },
       schema: {
+        tags: ["Auth"],
+        summary: "Register a new user",
         body: registerBodySchema,
         response: {
           201: registerResponseSchema,
@@ -65,7 +73,15 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post<{ Body: AuthBody }>(
     "/login",
     {
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: "1 minute"
+        }
+      },
       schema: {
+        tags: ["Auth"],
+        summary: "Login user and return tokens",
         body: loginBodySchema,
         response: {
           200: tokensResponseSchema,
@@ -94,6 +110,8 @@ export async function authRoutes(fastify: FastifyInstance) {
     "/refresh",
     {
       schema: {
+        tags: ["Auth"],
+        summary: "Refresh access and refresh tokens",
         body: refreshBodySchema,
         response: {
           200: tokensResponseSchema,
@@ -124,6 +142,9 @@ export async function authRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize(),
       schema: {
+        tags: ["Auth"],
+        summary: "Logout current user",
+        security: [{ bearerAuth: [] }],
         response: {
           200: logoutResponseSchema,
           401: problemDetailsSchema
@@ -141,6 +162,9 @@ export async function authRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize(),
       schema: {
+        tags: ["Auth"],
+        summary: "Get current authenticated profile",
+        security: [{ bearerAuth: [] }],
         response: {
           200: meResponseSchema,
           401: problemDetailsSchema
@@ -157,6 +181,9 @@ export async function authRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.ADMIN]),
       schema: {
+        tags: ["Auth"],
+        summary: "Get current admin profile",
+        security: [{ bearerAuth: [] }],
         response: {
           200: meResponseSchema,
           401: problemDetailsSchema,

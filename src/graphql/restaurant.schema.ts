@@ -98,4 +98,57 @@ export const restaurantSchema = `
     orders(limit: Int, offset: Int, status: OrderStatus, restaurantId: ID): PaginatedOrders!
     me: User
   }
+
+  input CreateRestaurantInput {
+    name: String!
+    image: String
+    address: String
+    postalCode: String
+    city: String
+    rating: Float
+  }
+
+  input UpdateRestaurantInput {
+    name: String
+    image: String
+    address: String
+    postalCode: String
+    city: String
+    rating: Float
+  }
+
+  input CreateDishInput {
+    name: String!
+    description: String
+    price: Float!
+    image: String
+  }
+
+  input UpdateDishInput {
+    name: String
+    description: String
+    price: Float
+    image: String
+  }
+
+  input CreateOrderItemInput {
+    dishId: ID!
+    quantity: Int!
+  }
+
+  input CreateOrderInput {
+    restaurantId: ID!
+    items: [CreateOrderItemInput!]!
+  }
+
+  type Mutation {
+    createMyRestaurant(input: CreateRestaurantInput!): Restaurant!
+    updateMyRestaurant(input: UpdateRestaurantInput!): Restaurant!
+    createDish(restaurantId: ID!, input: CreateDishInput!): Dish!
+    updateDish(dishId: ID!, input: UpdateDishInput!): Dish!
+    deleteDish(dishId: ID!): Boolean!
+    createOrder(input: CreateOrderInput!): Order!
+    updateOrderStatus(orderId: ID!, status: OrderStatus!): Order!
+    cancelOrder(orderId: ID!): Boolean!
+  }
 `;

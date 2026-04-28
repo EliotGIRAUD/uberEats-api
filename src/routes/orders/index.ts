@@ -32,6 +32,9 @@ export async function ordersRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.USER]),
       schema: {
+        tags: ["Orders"],
+        summary: "Create order",
+        security: [{ bearerAuth: [] }],
         body: createOrderBodySchema,
         response: {
           201: orderResponseSchema,
@@ -53,6 +56,9 @@ export async function ordersRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize(),
       schema: {
+        tags: ["Orders"],
+        summary: "Get order by id",
+        security: [{ bearerAuth: [] }],
         params: orderIdParamsSchema,
         response: {
           200: orderResponseSchema,
@@ -72,6 +78,9 @@ export async function ordersRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.RESTAURANT]),
       schema: {
+        tags: ["Orders"],
+        summary: "Update order status",
+        security: [{ bearerAuth: [] }],
         params: orderIdParamsSchema,
         body: statusUpdateBodySchema,
         response: {
@@ -93,6 +102,9 @@ export async function ordersRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.USER]),
       schema: {
+        tags: ["Orders"],
+        summary: "Cancel order",
+        security: [{ bearerAuth: [] }],
         params: orderIdParamsSchema,
         response: {
           204: { type: "null" },
@@ -117,6 +129,9 @@ export async function userOrdersRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.USER]),
       schema: {
+        tags: ["Orders"],
+        summary: "List my customer orders",
+        security: [{ bearerAuth: [] }],
         querystring: ordersListQuerySchema,
         response: {
           200: ordersPaginatedResponseSchema,
@@ -144,6 +159,9 @@ export async function restaurantOrdersRoutes(fastify: FastifyInstance) {
     {
       preHandler: fastify.authorize([UserRole.RESTAURANT]),
       schema: {
+        tags: ["Orders"],
+        summary: "List my restaurant orders",
+        security: [{ bearerAuth: [] }],
         querystring: ordersListQuerySchema,
         response: {
           200: ordersPaginatedResponseSchema,

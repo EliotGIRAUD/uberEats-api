@@ -1,6 +1,9 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import rateLimit from "@fastify/rate-limit";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
 import websocket from "@fastify/websocket";
 import { jwtDecorator } from "./decorators/jwtDecorator.js";
 import { registerGraphQL } from "./graphql/index.js";
@@ -28,6 +31,39 @@ export async function buildApp() {
   await app.register(cors, {
     origin: corsOrigin,
     credentials: corsCredentials
+  });
+  await app.register(swagger, {
+    openapi: {
+      info: {
+        title: "UberEats API",
+        description: "REST + WebSocket + GraphQL API for UberEats-like project",
+        version: "1.0.0"
+      },
+      servers: [{ url: "http://localhost:3000" }],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT"
+          }
+        }
+      }
+    }
+  });
+  await app.register(swaggerUi, {
+    routePrefix: "/docs",
+    staticCSP: true
+  });
+  app.get("/documentation/json", {
+    schema: {
+      hide: true
+    }
+  }, async () => app.swagger());
+  await app.register(rateLimit, {
+    global: true,
+    max: 100,
+    timeWindow: "1 minute"
   });
   const isDev = process.env.NODE_ENV !== "production";
   await app.register(helmet, isDev ? { contentSecurityPolicy: false } : {});
