@@ -1,0 +1,2 @@
+ALTER TABLE `Restaurant`
+ADD COLUMN `rating` DOUBLE NULL;

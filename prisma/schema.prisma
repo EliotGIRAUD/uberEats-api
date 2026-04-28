@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UserRole {
+  USER
+  RESTAURANT
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id          String       @id @default(cuid())
+  email       String       @unique
+  password    String
+  name        String?
+  refreshTokenHash String?
+  role        UserRole     @default(USER)
+  restaurants Restaurant[]
+  orders      Order[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Restaurant {
+  id         String   @id @default(cuid())
+  name       String
+  image      String?
+  address    String?
+  postalCode String?
+  city       String?
+  rating     Float?
+  ownerId    String
+  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  dishes     Dish[]
+  orders     Order[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Dish {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  price        Decimal     @db.Decimal(10, 2)
+  image        String?
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems   OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  status       OrderStatus @default(PENDING)
+  totalPrice   Decimal     @db.Decimal(10, 2)
+  customerId   String
+  customer     User        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  dishId    String
+  dish      Dish     @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  quantity  Int
+  unitPrice Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

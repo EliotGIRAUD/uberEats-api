@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ubereats-api
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql://root:root@db:3306/ubereats_api
+      JWT_SECRET: tkt_c_grave_secur
+      JWT_ACCESS_EXPIRES_IN: 30m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CORS_ORIGIN: http://localhost:3000
+      CORS_CREDENTIALS: "true"
+      HOST: 0.0.0.0
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - api_node_modules:/app/node_modules
+    command: >
+      sh -c "npm ci &&
+      npx prisma generate &&
+      npx prisma migrate deploy &&
+      npm run db:seed:if-empty &&
+      npm run dev"
+
+  db:
+    image: mariadb:11
+    container_name: ubereats-db
+    restart: on-failure
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: ubereats_api
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb -uroot -proot -e 'SELECT 1' >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  db_data:
+  api_node_modules:

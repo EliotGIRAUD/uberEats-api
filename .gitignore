@@ -1,0 +1,22 @@
+node_modules/
+dist/
+coverage/
+html/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Prisma generated output (if custom output is used)
+generated/prisma/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
