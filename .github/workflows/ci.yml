@@ -51,11 +51,12 @@ jobs:
       - name: Wait for DB
         run: |
           for i in {1..60}; do
-            if mariadb -h127.0.0.1 -uroot -proot -e "SELECT 1" >/dev/null 2>&1; then
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' ${{ job.services.mariadb.id }})
+            if [ "$STATUS" = "healthy" ]; then
               echo "MariaDB is ready"
               exit 0
             fi
-            echo "Waiting for MariaDB..."
+            echo "Waiting for MariaDB... (status=$STATUS)"
             sleep 2
           done
           echo "MariaDB did not become ready in time"
