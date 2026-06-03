@@ -2,6 +2,11 @@ import "dotenv/config";
 import type { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Unauthorized } from "../../src/common/exceptions.js";
+import {
+  LOGIN_MAX_ATTEMPTS_PER_WINDOW,
+  recordLoginAttempt,
+  resetLoginProtectionStore
+} from "../../src/services/login-protection.service.js";
 
 const authServiceMocks = vi.hoisted(() => ({
   register: vi.fn(),
@@ -26,6 +31,7 @@ describe("Auth routes integration", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetLoginProtectionStore();
   });
 
   afterAll(async () => {
@@ -88,6 +94,28 @@ describe("Auth routes integration", () => {
     const body = res.json() as { accessToken: string; refreshToken: string };
     expect(body.accessToken).toEqual(expect.any(String));
     expect(body.refreshToken).toEqual(expect.any(String));
+  });
+
+  it("POST /auth/login renvoie 429 après 5 tentatives en 1 minute (anti brute-force)", async () => {
+    authServiceMocks.login.mockRejectedValue(
+      new Unauthorized("Invalid credentials", "https://api.ubereats.local/problems/invalid-credentials")
+    );
+
+    for (let i = 0; i < LOGIN_MAX_ATTEMPTS_PER_WINDOW; i++) {
+      recordLoginAttempt("127.0.0.1");
+    }
+
+    const blocked = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { email: "brute@test.local", password: "wrongpass" }
+    });
+
+    expect(blocked.statusCode).toBe(429);
+    expect(blocked.headers["retry-after"]).toBeDefined();
+    const body = blocked.json() as { status: number; detail: string };
+    expect(body.status).toBe(429);
+    expect(body.detail).toContain("tentatives");
   });
 
   it("POST /auth/login rejette avec 401 si le mot de passe est invalide", async () => {

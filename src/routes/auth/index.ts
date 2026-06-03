@@ -1,6 +1,13 @@
 import { FastifyInstance } from "fastify";
 import { UserRole } from "@prisma/client";
+import { Unauthorized } from "../../common/exceptions.js";
 import { AuthService } from "../../services/auth.service.js";
+import {
+  assertLoginAllowed,
+  getClientIp,
+  recordLoginFailure,
+  recordLoginSuccess
+} from "../../services/login-protection.service.js";
 import {
   loginBodySchema,
   logoutResponseSchema,
@@ -74,35 +81,47 @@ export async function authRoutes(fastify: FastifyInstance) {
     "/login",
     {
       config: {
-        rateLimit: {
-          max: 20,
-          timeWindow: "1 minute"
-        }
+        rateLimit: false
       },
       schema: {
         tags: ["Auth"],
         summary: "Login user and return tokens",
+        description:
+          "Protection anti brute-force par IP : max 5 tentatives / minute, blocage 15 min, délai progressif entre échecs. En production : ajouter un CAPTCHA après 2–3 échecs.",
         body: loginBodySchema,
         response: {
           200: tokensResponseSchema,
-          401: problemDetailsSchema
+          401: problemDetailsSchema,
+          429: problemDetailsSchema
         }
       }
     },
     async (request, reply) => {
-      const user = await authService.login(request.body);
-      const accessToken = await reply.jwtSign(
-        { id: user.id, email: user.email, role: user.role, tokenType: "access" },
-        { expiresIn: accessTokenExpiresIn }
-      );
-      const refreshToken = await reply.jwtSign(
-        { id: user.id, email: user.email, role: user.role, tokenType: "refresh" },
-        { expiresIn: refreshTokenExpiresIn }
-      );
+      assertLoginAllowed(request);
+      const ip = getClientIp(request);
 
-      await authService.setRefreshToken(user.id, refreshToken);
+      try {
+        const user = await authService.login(request.body);
+        recordLoginSuccess(ip);
 
-      return reply.send({ accessToken, refreshToken });
+        const accessToken = await reply.jwtSign(
+          { id: user.id, email: user.email, role: user.role, tokenType: "access" },
+          { expiresIn: accessTokenExpiresIn }
+        );
+        const refreshToken = await reply.jwtSign(
+          { id: user.id, email: user.email, role: user.role, tokenType: "refresh" },
+          { expiresIn: refreshTokenExpiresIn }
+        );
+
+        await authService.setRefreshToken(user.id, refreshToken);
+
+        return reply.send({ accessToken, refreshToken });
+      } catch (error) {
+        if (error instanceof Unauthorized) {
+          recordLoginFailure(ip);
+        }
+        throw error;
+      }
     }
   );
 

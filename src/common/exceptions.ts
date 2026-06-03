@@ -62,3 +62,12 @@ export class ConflictError extends HttpError {
     super({ status: 409, title: "Conflict", type, detail });
   }
 }
+
+export class TooManyRequests extends HttpError {
+  readonly retryAfterSeconds?: number;
+
+  constructor(detail: string, retryAfterSeconds?: number, type = `${PROBLEM_BASE_URL}/too-many-requests`) {
+    super({ status: 429, title: "Too Many Requests", type, detail });
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
