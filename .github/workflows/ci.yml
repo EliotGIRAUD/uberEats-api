@@ -28,6 +28,7 @@ jobs:
           --health-retries=20
 
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       DATABASE_URL: mysql://root:${{ secrets.MARIADB_ROOT_PASSWORD }}@127.0.0.1:3306/ubereats_api_test
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_ACCESS_EXPIRES_IN: 30m

@@ -4,10 +4,14 @@ import { HttpError, TooManyRequests } from "../common/exceptions.js";
 const PROBLEM_JSON = "application/problem+json";
 
 export function problemDetailsErrorHandler(error: FastifyError, request: FastifyRequest, reply: FastifyReply) {
-  if (error instanceof HttpError) {
-    if (error instanceof TooManyRequests && error.retryAfterSeconds !== undefined) {
+  if (error instanceof TooManyRequests) {
+    if (error.retryAfterSeconds !== undefined) {
       reply.header("Retry-After", String(error.retryAfterSeconds));
     }
+    return reply.header("Content-Type", PROBLEM_JSON).status(error.status).send(error.toProblemDetails());
+  }
+
+  if (error instanceof HttpError) {
     return reply.header("Content-Type", PROBLEM_JSON).status(error.status).send(error.toProblemDetails());
   }
 

@@ -1,7 +1,7 @@
 ## Validation Technique Finale — API UberEats (Fastify + Prisma + SQL)
 
 ### Contexte
-Validation locale réalisée sur le projet `uberEats-api` pour vérifier la conformité technique avant rendu.
+Validation locale réalisée sur le projet `uberEats-api` pour vérifier la conformité technique.
 
 ### Commandes exécutées
 
